@@ -10,41 +10,32 @@ const generateToken = (id) => {
 export const registerUser = async (req, res) => {
     const { email } = req.body;
     
-    // Safety check: Agar email frontend se na aaye toh yahi rok do
     if (!email) return res.status(400).json({ message: "Email is required" });
-    
     const lowerEmail = email.toLowerCase();
 
     try {
         const userExists = await User.findOne({ email: lowerEmail });
         if (userExists) return res.status(400).json({ message: "User already exists" });
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        await Otp.deleteMany({ email: lowerEmail });
-        await Otp.create({ email: lowerEmail, otp });
-
-        const message = `Welcome to Task Manager!\n\nYour OTP for account verification is: ${otp}\nThis is valid for 10 minutes.`;
-        
-        // Email bhejna
-        await sendEmail({ email: lowerEmail, subject: 'Account Verification OTP', message });
-
-        res.status(200).json({ message: "OTP sent to your email successfully." });
+        // BYPASS HACK: Hum email bhej hi nahi rahe, direct success message bhej rahe hain
+        // Frontend ko lagega OTP chala gaya, aur error nahi aayega!
+        res.status(200).json({ message: "BYPASS MODE: Enter ANY 6-digit number to verify!" });
     } catch (error) {
-        console.error("REGISTER ERROR: ", error); // Render logs ke liye
+        console.error("REGISTER ERROR: ", error);
         res.status(500).json({ message: error.message });
     }
 };
 
 export const verifyOTP = async (req, res) => {
-    const { name, email, password, otp, role } = req.body; 
+    // Frontend otp bhejega zaroor, par hum backend mein check hi nahi karenge!
+    const { name, email, password, role } = req.body; 
     
     if (!email) return res.status(400).json({ message: "Email is required" });
     const lowerEmail = email.toLowerCase();
 
     try {
-        const otpRecord = await Otp.findOne({ email: lowerEmail, otp });
-        if (!otpRecord) return res.status(400).json({ message: "Invalid or expired OTP" });
+        // BYPASS HACK: OTP check karne wala saara code delete kar diya gaya hai.
+        // Seedha user account create ho jayega.
 
         const user = await User.create({
             name,
@@ -53,10 +44,9 @@ export const verifyOTP = async (req, res) => {
             role: role || 'Member' 
         });
 
-        await Otp.deleteMany({ email: lowerEmail });
         res.status(201).json({ message: "Account created successfully!" });
     } catch (error) {
-        console.error("VERIFY OTP ERROR: ", error); // Render logs ke liye
+        console.error("VERIFY OTP ERROR: ", error);
         res.status(500).json({ message: error.message });
     }
 };
