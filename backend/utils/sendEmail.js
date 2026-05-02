@@ -10,6 +10,7 @@ const sendEmail = async (options) => {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
+        family: 4, // YEH WOH MAGIC LINE HAI JO RENDER KA ERROR FIX KAREGI (Forces IPv4)
         // Render ke connection timeouts ko rokne ke liye:
         tls: {
             rejectUnauthorized: false
